@@ -28,10 +28,11 @@ type Common struct {
 
 func APICall(req Request, common Common, resultChannel chan<- string) {
 
+	defer close(resultChannel)
+
 	var requestBody, err = json.Marshal(req)
 	if err != nil {
 		log.Printf("Failed to jsonalize the request body: %v\n", err)
-		resultChannel <- ""
 		return
 	}
 
@@ -46,7 +47,6 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 	request, err := http.NewRequest(http.MethodPost, common.URL, bytes.NewReader(requestBody))
 	if err != nil {
 		log.Printf("Failed to create a first POST request: %v\n", err)
-		resultChannel <- ""
 		return
 	}
 	request.Header.Add("Content-Type", "application/json")
@@ -66,7 +66,6 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 	response, err := client.Do(request)
 	if err != nil {
 		log.Printf("Failed to send a first POST request: %v\n", err)
-		resultChannel <- ""
 		return
 	}
 	defer response.Body.Close()
@@ -74,7 +73,6 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 		log.Printf("The response isn't 302 Found.\n")
 		// b, _ := io.ReadAll(response.Body)
 		// log.Println(string(b))
-		resultChannel <- ""
 		return
 	}
 
@@ -83,13 +81,11 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 	request, err = http.NewRequest(http.MethodGet, redirectURL /* body = */, nil)
 	if err != nil {
 		log.Printf("Failed to create a second GET request: %v\n", err)
-		resultChannel <- ""
 		return
 	}
 	response, err = client.Do(request)
 	if err != nil {
 		log.Printf("Failed to send a second GET request: %v\n", err)
-		resultChannel <- ""
 		return
 	}
 	defer response.Body.Close()
@@ -97,7 +93,6 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 	content, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Printf("Failed to read the request body of a second GET request: %v\n", err)
-		resultChannel <- ""
 		return
 	}
 
@@ -105,7 +100,6 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 	file, err := os.Create(filename)
 	if err != nil {
 		log.Printf("Failed to create the file [ %v ]: %v\n", filename, err)
-		resultChannel <- ""
 		return
 	}
 	defer file.Close()
@@ -113,7 +107,6 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 	_, err = file.Write(content)
 	if err != nil {
 		log.Printf("Failed to write to the file [ %v ]: %v\n", filename, err)
-		resultChannel <- ""
 		return
 	}
 
