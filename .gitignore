@@ -12,7 +12,6 @@ old/
 used/
 sandbox/
 
-wav/
 *.json
 !template_config.json
 coefontuber
