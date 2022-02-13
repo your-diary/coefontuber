@@ -1,0 +1,16 @@
+tags
+.*
+!.gitignore
+!.dockerignore
+.DS_Store
+*.out
+*.class
+target/
+__pycache__/
+node_modules/
+old/
+used/
+sandbox/
+
+wav/
+*.json
