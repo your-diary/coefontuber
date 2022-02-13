@@ -6,6 +6,10 @@ As a vtuber streams a live with his/her virtual appearance, Coefontuber lets you
 
 It is written in Go.
 
+| [![](./readme_assets/demo.png)](https://www.youtube.com/watch?v=e4FaFSA-_7g) |
+|:-:|
+| Demo |
+
 # 1. How It Works
 
 Say you want to make Coefontuber speak "hello", "world" and "bye". Here is what is happening under the hood:
@@ -23,6 +27,8 @@ Say you want to make Coefontuber speak "hello", "world" and "bye". Here is what 
 | Figure: How Coefontuber Works |
 
 # 2. Prerequisites
+
+## 2.1 Sign Up
 
 1. Sign up for [CoeFont](https://coefont.cloud/).
 
