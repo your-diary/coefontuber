@@ -20,12 +20,6 @@ const (
 
 func main() {
 
-	// 	if len(os.Args) != 2 {
-	// 		fmt.Println("./main.out <string>")
-	// 		os.Exit(1)
-	// 	}
-	// 	var text = os.Args[1]
-
 	var config, err = config.ReadConfigFile(configFile)
 	if err != nil {
 		log.Printf("Failed to read the config file [ %v ]: %v\n", configFile, err)
