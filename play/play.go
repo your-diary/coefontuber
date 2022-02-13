@@ -4,7 +4,13 @@ import "errors"
 import "log"
 import "os/exec"
 
-func Play(wavFile string) {
+func Play(filenameChannel <-chan string, batonIn <-chan struct{}, batonOut chan<- struct{}) {
+	defer close(batonOut)
+	var wavFile = <-filenameChannel
+	if wavFile == "" {
+		return
+	}
+	<-batonIn
 	var err = exec.Command("afplay", wavFile).Run()
 	var e *exec.ExitError
 	if errors.As(err, &e) {
@@ -14,4 +20,5 @@ func Play(wavFile string) {
 		log.Printf("Failed to play the file [ %v ]: %v\n", wavFile, err)
 		return
 	}
+	// log.Printf("Play: [ %v ]\n", wavFile)
 }

@@ -26,12 +26,13 @@ type Common struct {
 	OutputDir    string
 }
 
-func APICall(req Request, common Common) (filename string) {
+func APICall(req Request, common Common, resultChannel chan<- string) {
 
 	var requestBody, err = json.Marshal(req)
 	if err != nil {
 		log.Printf("Failed to jsonalize the request body: %v\n", err)
-		return ""
+		resultChannel <- ""
+		return
 	}
 
 	var currentTime = time.Now().Unix()
@@ -45,7 +46,8 @@ func APICall(req Request, common Common) (filename string) {
 	request, err := http.NewRequest(http.MethodPost, common.URL, bytes.NewReader(requestBody))
 	if err != nil {
 		log.Printf("Failed to create a first POST request: %v\n", err)
-		return ""
+		resultChannel <- ""
+		return
 	}
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Authorization", common.AccessKey)
@@ -64,14 +66,16 @@ func APICall(req Request, common Common) (filename string) {
 	response, err := client.Do(request)
 	if err != nil {
 		log.Printf("Failed to send a first POST request: %v\n", err)
-		return ""
+		resultChannel <- ""
+		return
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusFound {
 		log.Printf("The response isn't 302 Found.\n")
 		// b, _ := io.ReadAll(response.Body)
 		// log.Println(string(b))
-		return ""
+		resultChannel <- ""
+		return
 	}
 
 	//The second request is sent to `s3.amazonaws.com` from which we get the resultant .wav file.
@@ -79,35 +83,41 @@ func APICall(req Request, common Common) (filename string) {
 	request, err = http.NewRequest(http.MethodGet, redirectURL /* body = */, nil)
 	if err != nil {
 		log.Printf("Failed to create a second GET request: %v\n", err)
-		return ""
+		resultChannel <- ""
+		return
 	}
 	response, err = client.Do(request)
 	if err != nil {
 		log.Printf("Failed to send a second GET request: %v\n", err)
-		return ""
+		resultChannel <- ""
+		return
 	}
 	defer response.Body.Close()
 
 	content, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Printf("Failed to read the request body of a second GET request: %v\n", err)
-		return ""
+		resultChannel <- ""
+		return
 	}
 
-	filename = fmt.Sprintf("%v/%v_%v.wav", common.OutputDir, currentTime, req.Text)
+	var filename = fmt.Sprintf("%v/%v_%v.wav", common.OutputDir, currentTime, req.Text)
 	file, err := os.Create(filename)
 	if err != nil {
 		log.Printf("Failed to create the file [ %v ]: %v\n", filename, err)
-		return ""
+		resultChannel <- ""
+		return
 	}
 	defer file.Close()
 
 	_, err = file.Write(content)
 	if err != nil {
 		log.Printf("Failed to write to the file [ %v ]: %v\n", filename, err)
-		return ""
+		resultChannel <- ""
+		return
 	}
 
-	return filename
+	resultChannel <- filename
+	// log.Printf("Save: [ %v ]\n", filename)
 
 }
