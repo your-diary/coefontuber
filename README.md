@@ -1,6 +1,6 @@
 # Coefontuber
 
-Coefontuber, which is named after [CoeFont](https://coefont.cloud/coefonts) + [YouTuber](https://www.youtube.com/), is an interactive CUI tool in which you type any text and make it voiced over.
+Coefontuber, which is named after [CoeFont](https://coefont.cloud/coefonts) + [YouTuber](https://www.youtube.com/), is an interactive CUI client for CoeFont.
 
 As a vtuber streams a live with his/her virtual appearance, Coefontuber lets you *speak* with a virtual voice.
 
