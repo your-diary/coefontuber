@@ -36,14 +36,22 @@ Say you want to make Coefontuber speak "hello", "world" and "bye". Here is what 
 
 ## 2.2 Supported Environments
 
-macOS only.
+macOS and Linux only.
 
 Or most platforms with a simple modification.
 
-There is a single line which is platform-dependent in `./play/play.go`:
+There is a single statement which is platform-dependent in `./play/play.go`:
 
 ```go
-var err = exec.Command("afplay", wavFile).Run() //plays a .wav file, assuming macOS
+var err = func() error {
+    if runtime.GOOS == "darwin" { //macOS
+        return exec.Command("afplay", wavFile).Run()
+    } else if runtime.GOOS == "linux" { //Linux with SoX installed
+        return exec.Command("play", "--no-show-progress", wavFile).Run()
+    } else {
+        return fmt.Errorf("unsupported platform")
+    }
+}()
 ```
 
 ## 2.3 Configuration File
