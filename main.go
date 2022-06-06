@@ -58,6 +58,18 @@ func main() {
 			break
 		}
 
+		if line == "" {
+			fmt.Println()
+			continue
+		} else if line == "!list" {
+			var prefixes = make([]string, len(config.CustomPrefixList))
+			for i, v := range config.CustomPrefixList {
+				prefixes[i] = v.Prefix
+			}
+			fmt.Printf("Registered Prefixes: %v\n\n", prefixes)
+			continue
+		}
+
 		var matches []string = prefixRegex.FindStringSubmatch(line)
 		var additionalArgs []string = nil
 		if len(matches) != 0 {
@@ -71,26 +83,22 @@ func main() {
 			line = matches[2]
 		}
 
-		if line != "" {
+		var req = coefont.Request{
+			FontUUID: config.Coefont.FontUUID,
+			Text:     line,
+			Speed:    config.Coefont.Speed,
+		}
 
-			var req = coefont.Request{
-				FontUUID: config.Coefont.FontUUID,
-				Text:     line,
-				Speed:    config.Coefont.Speed,
-			}
+		var resultChannel = make(chan string)
+		batonIn = batonOut
+		batonOut = make(chan struct{})
 
-			var resultChannel = make(chan string)
-			batonIn = batonOut
-			batonOut = make(chan struct{})
+		go coefont.APICall(req, common, resultChannel)
+		go play.Play(resultChannel, batonIn, batonOut, additionalArgs)
 
-			go coefont.APICall(req, common, resultChannel)
-			go play.Play(resultChannel, batonIn, batonOut, additionalArgs)
-
-			if isFirst {
-				close(batonIn)
-				isFirst = false
-			}
-
+		if isFirst {
+			close(batonIn)
+			isFirst = false
 		}
 
 		fmt.Println()

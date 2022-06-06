@@ -95,6 +95,8 @@ is executed under the hood.
 
 Using this, you can apply [any effects supported by SoX](http://sox.sourceforge.net/sox.html#EFFECTS).
 
+You can type `!list` to list all of the prefixes you've registered.
+
 # 4. Usage
 
 ## 4.1 Build
