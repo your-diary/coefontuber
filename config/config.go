@@ -5,11 +5,6 @@ import "io"
 import "log"
 import "encoding/json"
 
-type ReadlineConfig struct {
-	VimMode     bool   `json:"vim_mode"`
-	HistoryFile string `json:"history_file"`
-}
-
 type CoefontConfig struct {
 	AccessKey    string  `json:"access_key"`
 	ClientSecret string  `json:"client_secret"`
@@ -17,11 +12,23 @@ type CoefontConfig struct {
 	Speed        float64 `json:"speed"`
 }
 
+type ReadlineConfig struct {
+	VimMode     bool   `json:"vim_mode"`
+	HistoryFile string `json:"history_file"`
+}
+
+type CustomPrefixConfig struct {
+	Prefix string   `json:"prefix"`
+	Args   []string `json:"args"`
+}
+
 type Config struct {
-	Readline   ReadlineConfig `json:"readline"`
-	Coefont    CoefontConfig  `json:"coefont"`
-	OutputDir  string         `json:"output_dir"`
-	TimeoutSec int            `json:"timeout_sec"`
+	Coefont          CoefontConfig        `json:"coefont"`
+	Readline         ReadlineConfig       `json:"readline"`
+	OutputDir        string               `json:"output_dir"`
+	TimeoutSec       int                  `json:"timeout_sec"`
+	CustomPrefixList []CustomPrefixConfig `json:"custom_prefix_list"`
+	CustomPrefixMap  map[string][]string
 }
 
 func ReadConfigFile(filepath string) (config Config, err error) {
@@ -41,6 +48,15 @@ func ReadConfigFile(filepath string) (config Config, err error) {
 	defer file.Close()
 
 	err = json.Unmarshal(content, &config)
-	return config, err
+	if err != nil {
+		return config, err
+	}
+
+	config.CustomPrefixMap = map[string][]string{}
+	for _, v := range config.CustomPrefixList {
+		config.CustomPrefixMap[v.Prefix] = v.Args
+	}
+
+	return config, nil
 
 }

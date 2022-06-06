@@ -10,5 +10,17 @@
         "history_file": "./.history"
     },
     "output_dir": "./wav",
-    "timeout_sec": 10
+    "timeout_sec": 10,
+    "custom_prefix_list": [
+        {
+            "prefix": "echo",
+            "args": [
+                "echo",
+                "0.8",
+                "0.88",
+                "60",
+                "0.4"
+            ]
+        }
+    ]
 }

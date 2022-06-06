@@ -1,8 +1,8 @@
 # Coefontuber
 
-Coefontuber, which is named after [CoeFont](https://coefont.cloud/coefonts) + [YouTuber](https://www.youtube.com/), is an interactive CUI client for CoeFont.
+Coefontuber, which is named after [CoeFont](https://coefont.cloud/coefonts) + [YouTuber](https://www.youtube.com/), is an interactive and cross-platform CUI client for CoeFont.
 
-As a vtuber streams a live with his/her virtual appearance, Coefontuber lets you *speak* with a virtual voice.
+As a vtuber streams a live with his/her virtual appearance, Coefontuber lets you *speak* with a virtual voice. Even sound effects such as echo are supported.
 
 It is written in Go.
 
@@ -34,27 +34,13 @@ Say you want to make Coefontuber speak "hello", "world" and "bye". Here is what 
 
 2. Visit [https://coefont.cloud/account/api](https://coefont.cloud/account/api) to generate a key for CoeFont API.
 
-## 2.2 Supported Environments
+## 2.2 Requirements
 
-macOS and Linux only.
+- [SoX](https://github.com/chirlu/sox) (We call `play` command bundled with SoX.)
 
-Or most platforms with a simple modification.
+# 3. Configurations
 
-There is a single statement which is platform-dependent in `./play/play.go`:
-
-```go
-var err = func() error {
-    if runtime.GOOS == "darwin" { //macOS
-        return exec.Command("afplay", wavFile).Run()
-    } else if runtime.GOOS == "linux" { //Linux with SoX installed
-        return exec.Command("play", "--no-show-progress", wavFile).Run()
-    } else {
-        return fmt.Errorf("unsupported platform")
-    }
-}()
-```
-
-## 2.3 Configuration File
+## 3.1 Configuration File
 
 Coefontuber reads `./config.json` as the configuration file.
 
@@ -75,25 +61,55 @@ Here is an example:
         "history_file": "./.history"
     },
     "output_dir":  "./wav",
-    "timeout_sec": 10
+    "timeout_sec": 10,
+    "custom_prefix_list": [
+        {
+            "prefix": "echo",
+            "args": [
+                "echo",
+                "0.8",
+                "0.88",
+                "60",
+                "0.4"
+            ]
+        }
+    ]
 }
 ```
 
-# 3. Usage
+## 3.2  `custom_prefix_list` (Sound Effects)
 
-## 3.1 Build
+The configuration field `custom_prefix_list` registers additional arguments to the `play` command used to play generated WAV files.
+
+With the example configuration above, if you for example input
+```
+!echo hello world
+```
+
+in an interactive session, then
+```bash
+play hello_world.wav echo 0.8 0.88 60 0.4
+```
+
+is executed under the hood.
+
+Using this, you can apply [any effects supported by SoX](http://sox.sourceforge.net/sox.html#EFFECTS).
+
+# 4. Usage
+
+## 4.1 Build
 
 ```bash
 go build
 ```
 
-## 3.2 Run
+## 4.2 Run
 
 ```bash
 ./coefontuber #starts an interactive session
 ```
 
-# 4. Development Notes
+# 5. Development Notes
 
 Run `./lint.sh` before you commit.
 

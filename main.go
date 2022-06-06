@@ -4,6 +4,7 @@ package main
 
 import "fmt"
 import "log"
+import "regexp"
 import "os"
 
 import "github.com/chzyer/readline"
@@ -48,12 +49,26 @@ func main() {
 	var batonIn chan struct{}
 	var batonOut chan struct{} = make(chan struct{})
 	var isFirst = true
+	var prefixRegex = regexp.MustCompile(`^!([^ ]+) (.*)$`)
 
 	for {
 
 		var line, err = rl.Readline()
 		if err != nil {
 			break
+		}
+
+		var matches []string = prefixRegex.FindStringSubmatch(line)
+		var additionalArgs []string = nil
+		if len(matches) != 0 {
+			var prefix = matches[1]
+			var args, ok = config.CustomPrefixMap[prefix]
+			if !ok {
+				log.Printf("unknown prefix: %v\n", prefix)
+				continue
+			}
+			additionalArgs = args
+			line = matches[2]
 		}
 
 		if line != "" {
@@ -69,7 +84,7 @@ func main() {
 			batonOut = make(chan struct{})
 
 			go coefont.APICall(req, common, resultChannel)
-			go play.Play(resultChannel, batonIn, batonOut)
+			go play.Play(resultChannel, batonIn, batonOut, additionalArgs)
 
 			if isFirst {
 				close(batonIn)
