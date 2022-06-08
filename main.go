@@ -83,7 +83,7 @@ func main() {
 			line = matches[2]
 		}
 
-		var req = coefont.Request{
+		var req = coefont.Text2SpeechRequest{
 			FontUUID: config.Coefont.FontUUID,
 			Text:     line,
 			Speed:    config.Coefont.Speed,
@@ -93,7 +93,7 @@ func main() {
 		batonIn = batonOut
 		batonOut = make(chan struct{})
 
-		go coefont.APICall(req, common, resultChannel)
+		go coefont.Text2Speech(req, common, resultChannel)
 		go play.Play(resultChannel, batonIn, batonOut, additionalArgs)
 
 		if isFirst {

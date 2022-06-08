@@ -12,12 +12,6 @@ import "net/http"
 import "os"
 import "time"
 
-type Request struct {
-	FontUUID string  `json:"coefont"`
-	Text     string  `json:"text"`
-	Speed    float64 `json:"speed"`
-}
-
 type Common struct {
 	AccessKey    string
 	ClientSecret string
@@ -26,7 +20,38 @@ type Common struct {
 	OutputDir    string
 }
 
-func APICall(req Request, common Common, resultChannel chan<- string) {
+/*-------------------------------------*/
+
+/* header */
+
+func createHeader(common Common, currentUnixSeconds int64, requestBody []byte) http.Header {
+
+	//makes a signature
+	var mac = hmac.New(sha256.New, []byte(common.ClientSecret))
+	var message = fmt.Sprintf("%d%s", currentUnixSeconds, requestBody)
+	mac.Write([]byte(message))
+	var signature = hex.EncodeToString(mac.Sum(nil))
+
+	return map[string][]string{
+		"Content-Type":      []string{"application/json"},
+		"Authorization":     []string{common.AccessKey},
+		"X-Coefont-Date":    []string{fmt.Sprintf("%d", currentUnixSeconds)},
+		"X-Coefont-Content": []string{signature},
+	}
+
+}
+
+/*-------------------------------------*/
+
+/* POST /text2speech */
+
+type Text2SpeechRequest struct {
+	FontUUID string  `json:"coefont"`
+	Text     string  `json:"text"`
+	Speed    float64 `json:"speed"`
+}
+
+func Text2Speech(req Text2SpeechRequest, common Common, resultChannel chan<- string) {
 
 	defer close(resultChannel)
 
@@ -36,23 +61,15 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 		return
 	}
 
-	var currentTime = time.Now().Unix()
-
-	//makes a signature
-	var mac = hmac.New(sha256.New, []byte(common.ClientSecret))
-	var message = fmt.Sprintf("%d%s", currentTime, requestBody)
-	mac.Write([]byte(message))
-	var signature = hex.EncodeToString(mac.Sum(nil))
-
 	request, err := http.NewRequest(http.MethodPost, common.URL, bytes.NewReader(requestBody))
 	if err != nil {
 		log.Printf("Failed to create a first POST request: %v\n", err)
 		return
 	}
-	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", common.AccessKey)
-	request.Header.Add("X-Coefont-Date", fmt.Sprintf("%d", currentTime))
-	request.Header.Add("X-Coefont-Content", signature)
+
+	var currentTime = time.Now().Unix()
+
+	request.Header = createHeader(common, currentTime, requestBody)
 
 	var client = &http.Client{
 		Timeout: time.Duration(common.TimeoutSec) * time.Second,
@@ -70,7 +87,7 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusFound {
-		log.Printf("The response isn't 302 Found.\n")
+		log.Printf("The response isn't `302 Found`.\n")
 		// b, _ := io.ReadAll(response.Body)
 		// log.Println(string(b))
 		return
@@ -114,3 +131,5 @@ func APICall(req Request, common Common, resultChannel chan<- string) {
 	// log.Printf("Save: [ %v ]\n", filename)
 
 }
+
+/*-------------------------------------*/
