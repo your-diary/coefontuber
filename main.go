@@ -15,9 +15,10 @@ import "coefontuber/config"
 import "coefontuber/play"
 
 const (
-	configFile = "./config.json"
-	apiURL     = "https://api.coefont.cloud/v1/text2speech"
-	prompt     = "\033[31m>>\033[0m "
+	configFile   = "./config.json"
+	apiURL       = "https://api.coefont.cloud/v1/text2speech"
+	dictCategory = "category"
+	prompt       = "\033[31m>>\033[0m "
 )
 
 func main() {
@@ -88,12 +89,18 @@ func main() {
 						continue
 					}
 					if tokens[0] == "del" {
-						//TODO
+						coefont.DeleteDict(
+							coefont.DeleteDictRequest{
+								Text:     tokens[1],
+								Category: dictCategory,
+							},
+							common,
+						)
 					} else {
 						coefont.PostDict(
 							coefont.PostDictRequest{
 								Text:     tokens[0],
-								Category: "category",
+								Category: dictCategory,
 								Yomi:     tokens[1],
 							},
 							common,

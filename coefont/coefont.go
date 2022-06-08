@@ -223,14 +223,69 @@ func PostDict(req PostDictRequest, common Common) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		log.Printf("The response isn't `200 OK`.\n")
-		// log.Printf("%v\n", response.StatusCode)
-		// b, _ := io.ReadAll(response.Body)
-		// log.Println(string(b))
+		if response.StatusCode == http.StatusBadRequest {
+			log.Println("Failed. The input may include a forbidden word.")
+		} else {
+			log.Println("Failed. The response isn't `200 OK`.")
+			// log.Printf("%v\n", response.StatusCode)
+			// b, _ := io.ReadAll(response.Body)
+			// log.Println(string(b))
+		}
 		return
 	}
 
 	fmt.Println("POST `/dict` succeeded.")
+
+}
+
+/*-------------------------------------*/
+
+/* DELETE /dict */
+
+type DeleteDictRequest struct {
+	Text     string `json:"text"`
+	Category string `json:"category"`
+}
+
+func DeleteDict(req DeleteDictRequest, common Common) {
+
+	var requestBody, err = json.Marshal([]DeleteDictRequest{req})
+	if err != nil {
+		log.Printf("Failed to jsonalize the request body: %v\n", err)
+		return
+	}
+
+	request, err := http.NewRequest(http.MethodDelete, dictURL, bytes.NewReader(requestBody))
+	if err != nil {
+		log.Printf("Failed to create a DELETE request: %v\n", err)
+		return
+	}
+
+	request.Header = createHeader(common, requestBody)
+
+	var client = &http.Client{
+		Timeout: time.Duration(common.TimeoutSec) * time.Second,
+	}
+
+	response, err := client.Do(request)
+	if err != nil {
+		log.Printf("Failed to send a DELETE request: %v\n", err)
+		return
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		if response.StatusCode == http.StatusNotFound {
+			log.Println("Failed. Word not found in the dictionary.")
+		} else {
+			log.Println("Failed. The response isn't `200 OK`.")
+			// log.Printf("%v\n", response.StatusCode)
+			// b, _ := io.ReadAll(response.Body)
+			// log.Println(string(b))
+		}
+		return
+	}
+
+	fmt.Println("DELETE `/dict` succeeded.")
 
 }
 
