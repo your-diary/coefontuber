@@ -6,6 +6,7 @@ import "fmt"
 import "log"
 import "regexp"
 import "os"
+import "strings"
 
 import "github.com/chzyer/readline"
 
@@ -49,7 +50,7 @@ func main() {
 	var batonIn chan struct{}
 	var batonOut chan struct{} = make(chan struct{})
 	var isFirst = true
-	var prefixRegex = regexp.MustCompile(`^!([^ ]+) (.*)$`)
+	var prefixRegex = regexp.MustCompile(`^!([^ ]+)( (.*))?$`)
 
 	for {
 
@@ -66,21 +67,60 @@ func main() {
 			for i, v := range config.CustomPrefixList {
 				prefixes[i] = v.Prefix
 			}
-			fmt.Printf("Registered Prefixes: %v\n\n", prefixes)
+			fmt.Printf("Registered prefixes: %v\n\n", prefixes)
 			continue
 		}
 
 		var matches []string = prefixRegex.FindStringSubmatch(line)
 		var additionalArgs []string = nil
 		if len(matches) != 0 {
+
 			var prefix = matches[1]
-			var args, ok = config.CustomPrefixMap[prefix]
-			if !ok {
-				log.Printf("unknown prefix: %v\n", prefix)
+
+			if prefix == "dict" {
+
+				if matches[2] == "" {
+					coefont.GetDict(common)
+				} else {
+					var tokens = strings.Split(matches[3], " ")
+					if len(tokens) != 2 {
+						fmt.Printf("Usage\n  !dict\n  !dict <word> <reading>\n  !dict del <word>\n\n")
+						continue
+					}
+					if tokens[0] == "del" {
+						//TODO
+					} else {
+						coefont.PostDict(
+							coefont.PostDictRequest{
+								Text:     tokens[0],
+								Category: "category",
+								Yomi:     tokens[1],
+							},
+							common,
+						)
+					}
+				}
+
+				fmt.Println()
 				continue
+
+			} else {
+
+				line = matches[3]
+				if line == "" {
+					fmt.Printf("No argument to `!` command.\n\n")
+					continue
+				}
+
+				var args, ok = config.CustomPrefixMap[prefix]
+				if !ok {
+					fmt.Printf("Unknown prefix: %v\n\n", prefix)
+					continue
+				}
+				additionalArgs = args
+
 			}
-			additionalArgs = args
-			line = matches[2]
+
 		}
 
 		var req = coefont.Text2SpeechRequest{

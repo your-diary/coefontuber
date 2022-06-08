@@ -87,9 +87,13 @@ func Text2Speech(req Text2SpeechRequest, common Common, resultChannel chan<- str
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusFound {
-		log.Printf("The response isn't `302 Found`.\n")
-		// b, _ := io.ReadAll(response.Body)
-		// log.Println(string(b))
+		if response.StatusCode == http.StatusBadRequest {
+			log.Println("Failed. The input may include a forbidden word.")
+		} else {
+			log.Println("Failed. The response isn't `302 Found`.")
+			// b, _ := io.ReadAll(response.Body)
+			// log.Println(string(b))
+		}
 		return
 	}
 
@@ -109,7 +113,7 @@ func Text2Speech(req Text2SpeechRequest, common Common, resultChannel chan<- str
 
 	content, err := io.ReadAll(response.Body)
 	if err != nil {
-		log.Printf("Failed to read the request body of a second GET request: %v\n", err)
+		log.Printf("Failed to read the response body of a second GET request: %v\n", err)
 		return
 	}
 
@@ -129,6 +133,107 @@ func Text2Speech(req Text2SpeechRequest, common Common, resultChannel chan<- str
 
 	resultChannel <- filename
 	// log.Printf("Save: [ %v ]\n", filename)
+
+}
+
+/*-------------------------------------*/
+
+/* GET /dict */
+
+type getDictResponse struct {
+	Text string `json:"text"`
+	//Category string `json:"category"`
+	Yomi string `json:"yomi"`
+}
+
+const dictURL = "https://api.coefont.cloud/v1/dict"
+
+func GetDict(common Common) {
+
+	request, err := http.NewRequest(http.MethodGet, dictURL, nil)
+	if err != nil {
+		log.Printf("Failed to create a GET request: %v\n", err)
+		return
+	}
+
+	var currentTime = time.Now().Unix()
+
+	request.Header = createHeader(common, currentTime, nil)
+
+	var client = &http.Client{
+		Timeout: time.Duration(common.TimeoutSec) * time.Second,
+	}
+
+	response, err := client.Do(request)
+	if err != nil {
+		log.Printf("Failed to send a GET request: %v\n", err)
+		return
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		log.Printf("The response isn't `200 OK`.\n")
+		return
+	}
+	content, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Printf("Failed to read the response body of a GET request: %v\n", err)
+		return
+	}
+
+	var dictList []getDictResponse
+	json.Unmarshal(content, &dictList)
+
+	fmt.Println(dictList)
+
+}
+
+/*-------------------------------------*/
+
+/* POST /dict */
+
+type PostDictRequest struct {
+	Text     string `json:"text"`
+	Category string `json:"category"`
+	Yomi     string `json:"yomi"`
+}
+
+func PostDict(req PostDictRequest, common Common) {
+
+	var requestBody, err = json.Marshal([]PostDictRequest{req})
+	if err != nil {
+		log.Printf("Failed to jsonalize the request body: %v\n", err)
+		return
+	}
+
+	request, err := http.NewRequest(http.MethodPost, dictURL, bytes.NewReader(requestBody))
+	if err != nil {
+		log.Printf("Failed to create a POST request: %v\n", err)
+		return
+	}
+
+	var currentTime = time.Now().Unix()
+
+	request.Header = createHeader(common, currentTime, requestBody)
+
+	var client = &http.Client{
+		Timeout: time.Duration(common.TimeoutSec) * time.Second,
+	}
+
+	response, err := client.Do(request)
+	if err != nil {
+		log.Printf("Failed to send a POST request: %v\n", err)
+		return
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		log.Printf("The response isn't `200 OK`.\n")
+		// log.Printf("%v\n", response.StatusCode)
+		// b, _ := io.ReadAll(response.Body)
+		// log.Println(string(b))
+		return
+	}
+
+	fmt.Println("POST `/dict` succeeded.")
 
 }
 
