@@ -24,7 +24,9 @@ type Common struct {
 
 /* header */
 
-func createHeader(common Common, currentUnixSeconds int64, requestBody []byte) http.Header {
+func createHeader(common Common, requestBody []byte) http.Header {
+
+	var currentUnixSeconds = time.Now().Unix()
 
 	//makes a signature
 	var mac = hmac.New(sha256.New, []byte(common.ClientSecret))
@@ -67,9 +69,8 @@ func Text2Speech(req Text2SpeechRequest, common Common, resultChannel chan<- str
 		return
 	}
 
-	var currentTime = time.Now().Unix()
-
-	request.Header = createHeader(common, currentTime, requestBody)
+	var requestHeader = createHeader(common, requestBody)
+	request.Header = requestHeader
 
 	var client = &http.Client{
 		Timeout: time.Duration(common.TimeoutSec) * time.Second,
@@ -117,7 +118,7 @@ func Text2Speech(req Text2SpeechRequest, common Common, resultChannel chan<- str
 		return
 	}
 
-	var filename = fmt.Sprintf("%v/%v_%v.wav", common.OutputDir, currentTime, req.Text)
+	var filename = fmt.Sprintf("%v/%v_%v.wav", common.OutputDir, requestHeader.Get("X-Coefont-Date"), req.Text)
 	file, err := os.Create(filename)
 	if err != nil {
 		log.Printf("Failed to create the file [ %v ]: %v\n", filename, err)
@@ -156,9 +157,7 @@ func GetDict(common Common) {
 		return
 	}
 
-	var currentTime = time.Now().Unix()
-
-	request.Header = createHeader(common, currentTime, nil)
+	request.Header = createHeader(common, nil)
 
 	var client = &http.Client{
 		Timeout: time.Duration(common.TimeoutSec) * time.Second,
@@ -211,9 +210,7 @@ func PostDict(req PostDictRequest, common Common) {
 		return
 	}
 
-	var currentTime = time.Now().Unix()
-
-	request.Header = createHeader(common, currentTime, requestBody)
+	request.Header = createHeader(common, requestBody)
 
 	var client = &http.Client{
 		Timeout: time.Duration(common.TimeoutSec) * time.Second,
