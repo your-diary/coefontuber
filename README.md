@@ -2,7 +2,7 @@
 
 Coefontuber, which is named after [CoeFont](https://coefont.cloud/coefonts) + [YouTuber](https://www.youtube.com/), is an interactive and cross-platform CUI client for CoeFont.
 
-As a vtuber streams a live with his/her virtual appearance, Coefontuber lets you *speak* with a virtual voice. Even sound effects such as echo are supported.
+As a vtuber streams a live with his/her virtual appearance, Coefontuber lets you *speak* with a virtual voice. Even dictionary and sound effects such as echo are supported.
 
 It is written in Go.
 
@@ -66,6 +66,8 @@ Here is an example configuration:
 
 ## 2.2  `custom_prefix_list` (Sound Effects)
 
+See also: [3.3 Special Commands](#33-special-commands)
+
 The configuration field `custom_prefix_list` registers additional arguments to the `play` command used to play generated WAV files.
 
 With the example configuration above, if you for example input
@@ -97,6 +99,29 @@ go build
 ```bash
 ./coefontuber #starts an interactive session
 ```
+
+## 3.3 Special Commands
+
+In an interactive session, each input of the form
+```
+!<word>[ <arg(s)>]
+```
+
+is interpreted as a special command.
+
+### 3.3.1 Built-In Special Commands
+
+| Syntax | Description |
+|:-|:-|
+| `!help` | Shows help about all of the built-in special commands. |
+| `!list` | Shows the list of all of the user-defined special commands. |
+| `!dict` | Shows the list of the words registered to CoeFont dictionary. |
+| `!dict <word> <reading>` | Registers the word `<word>` with its pronunciation `<reading>` to CoeFont dictionary. |
+| `!dict del <word>` | Removes the word `<word>` from CoeFont dictionary. |
+
+### 3.3.2 User-Defined Special Commands
+
+User-define special commands are supported in a limited manner. See [2.2 `custom_prefix_list` (Sound Effects)](#22--custom_prefix_list-sound-effects) for the detail.
 
 # 4. Development Notes
 
