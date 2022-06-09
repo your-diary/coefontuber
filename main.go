@@ -63,22 +63,36 @@ func main() {
 		if line == "" {
 			fmt.Println()
 			continue
-		} else if line == "!list" {
-			var prefixes = make([]string, len(config.CustomPrefixList))
-			for i, v := range config.CustomPrefixList {
-				prefixes[i] = v.Prefix
-			}
-			fmt.Printf("Registered prefixes: %v\n\n", prefixes)
-			continue
 		}
 
+		//special commands
 		var matches []string = prefixRegex.FindStringSubmatch(line)
 		var additionalArgs []string = nil
 		if len(matches) != 0 {
 
 			var prefix = matches[1]
 
-			if prefix == "dict" {
+			if prefix == "help" {
+
+				fmt.Printf(`[Special Commands]
+!help
+!list
+!dict
+!dict <word> <reading>
+!dict del <word>` + "\n\n")
+				continue
+
+			} else if prefix == "list" {
+
+				var prefixes = make([]string, len(config.CustomPrefixList))
+				for i, v := range config.CustomPrefixList {
+					prefixes[i] = v.Prefix
+				}
+				fmt.Printf("Registered prefixes: %v\n\n", prefixes)
+
+				continue
+
+			} else if prefix == "dict" {
 
 				if matches[2] == "" {
 					coefont.GetDict(common)
