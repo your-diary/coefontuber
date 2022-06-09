@@ -10,43 +10,30 @@ It is written in Go.
 |:-:|
 | Demo |
 
-# 1. How It Works
+# 1. Requirements
 
-Say you want to make Coefontuber speak "hello", "world" and "bye". Here is what is happening under the hood:
-
-1. `main()` reads your inputs (i.e. "hello", "world" and "bye") using [GNU Readline](https://tiswww.case.edu/php/chet/readline/rltop.html).
-
-2. `main()` spawns a pair of `APICall()` and `Play()` for each input. All of such functions start running right away, and they are all asynchronous.
-
-3. `APICall()` sends a string to CoeFont and passes the resultant `.wav` file to the corresponding `Play()` using a [*channel*](https://go.dev/ref/spec#Channel_types). CoeFont works as a text-to-speech converter. Note that which `APICall()` returns first is undefined. It is possible `(E)` or `(F)` in the figure below returns before `(D)` returns though `(D)` is spawned first.
-
-4. `Play()` waits for the corresponding `APICall()` to give it a `.wav` file. In addition, it waits for the *adjacent* `Play()` which has been spawned right before it to return. This implies that, before `Play()` returns, it notifies *"I'm done."* to the adjacent `Play()`. By that, even if sequentially spawned `APICall()`s don't return in that order, it is guaranteed that `Play()`s speak in that order. These *"I'm done."* communications are also done via channels named `batonIn` (for listening) and `batonOut` (for notifying). Each instance of `batonIn` or `batonOut` is shared only by two adjacent `Play()`s. For example, if a `batonOut` is passed to `(B)` in the figure below as an argument, it is copied only once and passed to `(C)` as `batonIn`.
-
-| ![](./readme_assets/flow.png) |
-|:-:|
-| Figure: How Coefontuber Works |
-
-# 2. Prerequisites
-
-## 2.1 Sign Up
+## 1.1 Sign Up
 
 1. Sign up for [CoeFont](https://coefont.cloud/).
 
 2. Visit [https://coefont.cloud/account/api](https://coefont.cloud/account/api) to generate a key for CoeFont API.
 
-## 2.2 Requirements
+## 1.2 Requirements
 
 - [SoX](https://github.com/chirlu/sox) (We call `play` command bundled with SoX.)
 
-# 3. Configurations
+# 2. Configurations
 
-## 3.1 Configuration File
+## 2.1 Configuration File
 
 Coefontuber reads `./config.json` as the configuration file.
 
-You don't need to write `./config.json` from scratch; just `cp ./template_config.json ./config.json`.
+You don't need to write `./config.json` from scratch; just
+```bash
+cp ./template_config.json ./config.json
+```
 
-Here is an example:
+Here is an example configuration:
 
 ```json
 {
@@ -77,7 +64,7 @@ Here is an example:
 }
 ```
 
-## 3.2  `custom_prefix_list` (Sound Effects)
+## 2.2  `custom_prefix_list` (Sound Effects)
 
 The configuration field `custom_prefix_list` registers additional arguments to the `play` command used to play generated WAV files.
 
@@ -97,23 +84,39 @@ Using this, you can apply [any effects supported by SoX](http://sox.sourceforge.
 
 You can type `!list` to list all of the prefixes you've registered.
 
-# 4. Usage
+# 3. Usage
 
-## 4.1 Build
+## 3.1 Build
 
 ```bash
 go build
 ```
 
-## 4.2 Run
+## 3.2 Run
 
 ```bash
 ./coefontuber #starts an interactive session
 ```
 
-# 5. Development Notes
+# 4. Development Notes
 
 Run `./lint.sh` before you commit.
+
+# 5. How It Works
+
+Say you want to make Coefontuber speak "hello", "world" and "bye". Here is what is happening under the hood:
+
+1. `main()` reads your inputs (i.e. "hello", "world" and "bye") using [GNU Readline](https://tiswww.case.edu/php/chet/readline/rltop.html).
+
+2. `main()` spawns a pair of `APICall()` and `Play()` for each input. All of such functions start running right away, and they are all asynchronous.
+
+3. `APICall()` sends a string to CoeFont and passes the resultant `.wav` file to the corresponding `Play()` using a [*channel*](https://go.dev/ref/spec#Channel_types). CoeFont works as a text-to-speech converter. Note that which `APICall()` returns first is undefined. It is possible `(E)` or `(F)` in the figure below returns before `(D)` returns though `(D)` is spawned first.
+
+4. `Play()` waits for the corresponding `APICall()` to give it a `.wav` file. In addition, it waits for the *adjacent* `Play()` which has been spawned right before it to return. This implies that, before `Play()` returns, it notifies *"I'm done."* to the adjacent `Play()`. By that, even if sequentially spawned `APICall()`s don't return in that order, it is guaranteed that `Play()`s speak in that order. These *"I'm done."* communications are also done via channels named `batonIn` (for listening) and `batonOut` (for notifying). Each instance of `batonIn` or `batonOut` is shared only by two adjacent `Play()`s. For example, if a `batonOut` is passed to `(B)` in the figure below as an argument, it is copied only once and passed to `(C)` as `batonIn`.
+
+| ![](./readme_assets/flow.png) |
+|:-:|
+| Figure: How Coefontuber Works |
 
 <!-- vim: set spell: -->
 
