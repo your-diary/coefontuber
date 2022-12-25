@@ -92,8 +92,8 @@ func Text2Speech(req Text2SpeechRequest, common Common, resultChannel chan<- str
 			log.Println("Failed. The input may include a forbidden word.")
 		} else {
 			log.Println("Failed. The response isn't `302 Found`.")
-			// b, _ := io.ReadAll(response.Body)
-			// log.Println(string(b))
+			b, _ := io.ReadAll(response.Body)
+			log.Println(string(b))
 		}
 		return
 	}
