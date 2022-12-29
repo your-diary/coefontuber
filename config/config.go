@@ -12,6 +12,15 @@ type CoefontConfig struct {
 	Speed        float64 `json:"speed"`
 }
 
+type VoicevoxConfig struct {
+	Enabled           bool    `json:"enabled"`
+	ShouldSkipEnglish bool    `json:"should_skip_english"`
+	APIKey            string  `json:"api_key"`
+	URL               string  `json:"url"`
+	Speaker           string  `json:"speaker"`
+	Speed             float64 `json:"speed"`
+}
+
 type ReadlineConfig struct {
 	VimMode     bool   `json:"vim_mode"`
 	HistoryFile string `json:"history_file"`
@@ -24,6 +33,7 @@ type CustomPrefixConfig struct {
 
 type Config struct {
 	Coefont          CoefontConfig        `json:"coefont"`
+	Voicevox         VoicevoxConfig       `json:"voicevox"`
 	Readline         ReadlineConfig       `json:"readline"`
 	OutputDir        string               `json:"output_dir"`
 	TimeoutSec       int                  `json:"timeout_sec"`

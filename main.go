@@ -9,8 +9,10 @@ import "os"
 import "strings"
 
 import "github.com/chzyer/readline"
+import "golang.org/x/exp/utf8string"
 
 import "coefontuber/coefont"
+import "coefontuber/voicevox"
 import "coefontuber/config"
 import "coefontuber/play"
 
@@ -144,17 +146,35 @@ func main() {
 
 		}
 
-		var req = coefont.Text2SpeechRequest{
-			FontUUID: config.Coefont.FontUUID,
-			Text:     line,
-			Speed:    config.Coefont.Speed,
-		}
-
 		var resultChannel = make(chan string)
+
+		if config.Voicevox.Enabled { //VOICEVOX
+			if config.Voicevox.ShouldSkipEnglish && utf8string.NewString(line).IsASCII() {
+				fmt.Println()
+				continue
+			}
+			var req = voicevox.Request{
+				Speaker: config.Voicevox.Speaker,
+				Speed:   config.Voicevox.Speed,
+				Text:    line,
+			}
+			var common = voicevox.Common{
+				APIKey:     config.Voicevox.APIKey,
+				URL:        config.Voicevox.URL,
+				TimeoutSec: config.TimeoutSec,
+				OutputDir:  config.OutputDir,
+			}
+			go voicevox.Text2Speech(req, common, resultChannel)
+		} else { //CoeFont
+			var req = coefont.Text2SpeechRequest{
+				FontUUID: config.Coefont.FontUUID,
+				Text:     line,
+				Speed:    config.Coefont.Speed,
+			}
+			go coefont.Text2Speech(req, common, resultChannel)
+		}
 		batonIn = batonOut
 		batonOut = make(chan struct{})
-
-		go coefont.Text2Speech(req, common, resultChannel)
 		go play.Play(resultChannel, batonIn, batonOut, additionalArgs)
 
 		if isFirst {

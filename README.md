@@ -6,6 +6,8 @@ As a vtuber streams a live with his/her virtual appearance, Coefontuber lets you
 
 It is written in Go.
 
+<sub>In addition to CoeFont API, [VOICEVOX API](https://voicevox.su-shiki.com/su-shikiapis/) is supported. Currently this is experimental and not documented.</sub>
+
 | [![](./readme_assets/demo.png)](https://www.youtube.com/watch?v=e4FaFSA-_7g) |
 |:-:|
 | Demo |

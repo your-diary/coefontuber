@@ -5,6 +5,14 @@
         "font_uuid": "6c0540f7-9639-4d2b-ae8c-43572d9d7f79",
         "speed": 1.0
     },
+    "voicevox": {
+        "enabled": false,
+        "should_skip_english": true,
+        "url": "https://api.su-shiki.com/v2/voicevox/audio/",
+        "api_key": "U3PxH58855e999O",
+        "speaker": "a8cc6d22-aad0-4ab8-bf1e-2f843924164a",
+        "speed": 1.0
+    },
     "readline": {
         "vim_mode": false,
         "history_file": "./.history"
