@@ -7,7 +7,7 @@
     },
     "voicevox": {
         "enabled": false,
-        "should_skip_english": true,
+        "should_skip_non_japanese": true,
         "url": "https://api.su-shiki.com/v2/voicevox/audio/",
         "api_key": "U3PxH58855e999O",
         "speaker": "a8cc6d22-aad0-4ab8-bf1e-2f843924164a",

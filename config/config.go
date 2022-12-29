@@ -13,12 +13,12 @@ type CoefontConfig struct {
 }
 
 type VoicevoxConfig struct {
-	Enabled           bool    `json:"enabled"`
-	ShouldSkipEnglish bool    `json:"should_skip_english"`
-	APIKey            string  `json:"api_key"`
-	URL               string  `json:"url"`
-	Speaker           string  `json:"speaker"`
-	Speed             float64 `json:"speed"`
+	Enabled               bool    `json:"enabled"`
+	ShouldSkipNonJapanese bool    `json:"should_skip_non_japanese"`
+	APIKey                string  `json:"api_key"`
+	URL                   string  `json:"url"`
+	Speaker               string  `json:"speaker"`
+	Speed                 float64 `json:"speed"`
 }
 
 type ReadlineConfig struct {

@@ -9,12 +9,12 @@ import "os"
 import "strings"
 
 import "github.com/chzyer/readline"
-import "golang.org/x/exp/utf8string"
 
 import "coefontuber/coefont"
 import "coefontuber/voicevox"
 import "coefontuber/config"
 import "coefontuber/play"
+import "coefontuber/util"
 
 const (
 	configFile   = "./config.json"
@@ -149,7 +149,7 @@ func main() {
 		var resultChannel = make(chan string)
 
 		if config.Voicevox.Enabled { //VOICEVOX
-			if config.Voicevox.ShouldSkipEnglish && utf8string.NewString(line).IsASCII() {
+			if config.Voicevox.ShouldSkipNonJapanese && !util.IsJapanese(line) {
 				fmt.Println()
 				continue
 			}
