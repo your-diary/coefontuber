@@ -164,7 +164,6 @@ func main() {
 				TimeoutSec: config.TimeoutSec,
 				OutputDir:  config.OutputDir,
 			}
-			fmt.Println(common.APIKey)
 			go voicevox.Text2Speech(req, common, resultChannel)
 		} else { //CoeFont
 			var req = coefont.Text2SpeechRequest{
