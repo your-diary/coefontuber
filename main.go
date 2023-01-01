@@ -55,7 +55,7 @@ func main() {
 	var isFirst = true
 	var prefixRegex = regexp.MustCompile(`^!([^ ]+)( (.*))?$`)
 
-	for {
+	for iter := 0; ; iter++ {
 
 		var line, err = rl.Readline()
 		if err != nil {
@@ -159,11 +159,12 @@ func main() {
 				Text:    line,
 			}
 			var common = voicevox.Common{
-				APIKey:     config.Voicevox.APIKey,
+				APIKey:     config.Voicevox.APIKeys[iter%len(config.Voicevox.APIKeys)],
 				URL:        config.Voicevox.URL,
 				TimeoutSec: config.TimeoutSec,
 				OutputDir:  config.OutputDir,
 			}
+			fmt.Println(common.APIKey)
 			go voicevox.Text2Speech(req, common, resultChannel)
 		} else { //CoeFont
 			var req = coefont.Text2SpeechRequest{
