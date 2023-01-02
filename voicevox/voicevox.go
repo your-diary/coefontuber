@@ -10,6 +10,7 @@ import "log"
 import "net/http"
 import "os"
 import "time"
+import "strings"
 
 type Common struct {
 	APIKey     string
@@ -47,7 +48,12 @@ func Text2Speech(req Request, common Common, resultChannel chan<- string) {
 	if response.StatusCode != http.StatusOK {
 		log.Println("Error response is returned.")
 		b, _ := io.ReadAll(response.Body)
-		log.Println(string(b))
+		s := string(b)
+		log.Println(s)
+		if strings.Contains(s, "notEnoughPoints") {
+			log.Println("Exiting...")
+			panic("Lack of quota detected.")
+		}
 		return
 	}
 

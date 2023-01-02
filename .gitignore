@@ -12,7 +12,7 @@ old/
 used/
 sandbox/
 
-*.json
+*.json*
 !template_config.json
 coefontuber
 *.ai
